@@ -1,9 +1,6 @@
 OptiBot
 ==============================
 
-Here's a template for your README file that includes instructions for setting up and running your project using Poetry, with a reference to the pipx installation guide for users who prefer to install Poetry through pipx.
-
-```markdown
 # OptiBot
 
 OptiBot is a Python-based application designed for optimizing chatbot interactions. This application utilizes Streamlit for a user-friendly web interface.
