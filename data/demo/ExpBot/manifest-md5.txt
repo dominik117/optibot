@@ -1,0 +1,4 @@
+ea9e1ec73d290b2ad3953f34206a1d3c  data/readme.txt
+923113bda8c4cb21801a1ad592dde7c1  data/technical-md/dataset.tech_md.xml
+434bb5e2a0b8ca37ae93a39b9083a2dc  data/descriptive-md/dataset.desc_md.xml
+f0ec0435b2fb6c15ced4c4e40c8e1d75  data/dataset/chats_single.csv
