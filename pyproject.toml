@@ -1,16 +1,24 @@
 [tool.poetry]
-name = "src"
+name = "optibot"
 version = "0.1.0"
 description = "OptiBot enhances chatbot interactions using NLP and machine learning to identify and address common response issues, boosting accuracy and user satisfaction."
-authors = ["Dominik Bacher <email@example.com>"]
+authors = ["Dominik Bacher <dominikbacher@icloud.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-# Add your project dependencies here
+python = "^3.10.12"
+streamlit = "1.32.2"
+pandas = "1.5.3"
+seaborn = "0.13.1"
+gensim = "4.3.2"
+nltk = "3.8.1"
 
 [tool.poetry.dev-dependencies]
-# Add your development dependencies here
+
+
+[tool.poetry.scripts]
+optibot = "run_optibot:main"
+optibot-terminal = "optibot.main:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

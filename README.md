@@ -14,7 +14,7 @@ These instructions will get you a copy of the project up and running on your loc
 Before you begin, ensure you have the following installed:
 
 - Python 3.8 or higher
-- pip (Python package installer)
+- pipx (Python package installer)
 
 ### Installation
 
@@ -29,8 +29,8 @@ We recommend using Poetry for dependency management and project setup. If you pr
    First, clone the repository to your local machine:
 
    ```bash
-   git clone https://github.com/yourusername/OptiBot.git
-   cd OptiBot
+   git clone git@github.com:dominik117/optibot.git
+   cd optibot
    ```
 
 2. **Initialize the Project with Poetry**
@@ -38,7 +38,7 @@ We recommend using Poetry for dependency management and project setup. If you pr
    If you haven't already, install Poetry:
 
    ```bash
-   pip install poetry
+   pipx install poetry
    ```
 
    Then, set up the project using Poetry:
