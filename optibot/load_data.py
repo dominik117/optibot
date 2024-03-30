@@ -18,11 +18,11 @@ def load_csv(data_file):
 
 def merge_qa_columns(df, question_col, answer_col):
     df["conversation"] = "Question: " + df[question_col] + " Answer: " + df[answer_col]
-    return df[["conversation"]]
+    return df
 
 def extract_unified_column(df, col):
     df["conversation"] = df[col]
-    return df[["conversation"]]
+    return df
 
 
 def select_columns(df):
