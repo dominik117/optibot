@@ -1,4 +1,7 @@
 credentials/
+# Documentation not yet done
+docs-INDEV/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
