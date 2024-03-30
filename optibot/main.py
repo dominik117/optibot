@@ -1,5 +1,12 @@
 import pandas as pd
-import load_data
+from . import load_data
+from . import topic_modeling
+
+
+def run_optibot(df):
+    topics = topic_modeling.OptiBotTopicModeling(df, start_topic_count=3, end_topic_count=12)
+    topics.fit()
+    return topics
 
 def main():
     df = load_data.upload_data()
