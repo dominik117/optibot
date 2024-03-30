@@ -1,9 +1,6 @@
-OptiBot
-==============================
-
 # OptiBot
 
-OptiBot is a Python-based application designed for optimizing chatbot interactions. This application utilizes Streamlit for a user-friendly web interface.
+OptiBot enhances chatbot interactions using NLP and machine learning to identify and address common response issues, boosting accuracy and user satisfaction.
 
 ## Getting Started
 
@@ -18,59 +15,71 @@ Before you begin, ensure you have the following installed:
 
 ### Installation
 
-#### Poetry Installation
+#### Poetry for Dependency Management
 
-We recommend using Poetry for dependency management and project setup. If you prefer to install Poetry using pipx, follow the [pipx installation guide](https://pypa.github.io/pipx/installation/).
+This project uses Poetry for dependency management. If you don't have Poetry installed, it is recommended installing it using pipx. Refer to the [pipx installation guide](https://pypa.github.io/pipx/installation/) if pipx is not installed on your system.
 
 #### Project Setup
 
 1. **Clone the Repository**
 
-   First, clone the repository to your local machine:
+   Begin by cloning the repository to your local machine:
 
    ```bash
    git clone git@github.com:dominik117/optibot.git
    cd optibot
    ```
 
-2. **Initialize the Project with Poetry**
+2. **Install Poetry with pipx**
 
-   If you haven't already, install Poetry:
+   If pipx is installed but Poetry is not yet, install Poetry using the following command:
 
    ```bash
    pipx install poetry
    ```
 
-   Then, set up the project using Poetry:
+3. **Initialize the Project with Poetry**
+
+   Set up the project using Poetry:
 
    ```bash
    poetry install
    ```
 
-   This command reads the `pyproject.toml` file and installs all necessary dependencies.
-
 ### Running the Application
 
-To run the OptiBot application, use the following command:
+To run the OptiBot application, use one of the following commands:
+
+To run in a Streamlit App:
 
 ```bash
-poetry run streamlit run streamlit_app.py
+poetry run optibot
 ```
 
-This command launches the Streamlit web interface. Follow the on-screen instructions to interact with the application.
+To run in the terminal:
 
-## Usage
+```bash
+poetry run optibot-terminal
+```
 
-Provide instructions on how to use the application, detailing any steps the user needs to follow to perform tasks or configure settings.
+Follow the on-app instructions to interact with the application.
 
-## Contributing
-
-We welcome contributions! Please read `CONTRIBUTING.md` for details on our code of conduct and the process for submitting pull requests.
 
 ## License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.
 
-## Acknowledgments
+You can add a section at the end of the README titled "Acknowledgments" or "Background" where you give credit to the origins of the project and express gratitude to Dr. Marcel Blattner. Here's how you could incorporate this into your README:
 
-- List any dependencies, libraries, or other resources that you've used.
+---
+
+## Background
+
+This project began as a final project for the Generative AI class at the University of Applied Sciences in Lucerne, imparted by [Dr. Marcel Blattner](https://www.linkedin.com/in/marcelblattner/). Thanks to Dr. Blattner for his guidance and insights throughout the development of Optibot.
+
+## References
+
+- Refer to the [References](./references/) folder for more on this project, including acknowledgements.
+
+
+
