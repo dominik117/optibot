@@ -7,7 +7,7 @@ def main():
         selected_df = load_data.select_columns(df)
 
 def main_streamlit(df=None):
-    
+    return None
 
 if __name__ == "__main__":
     main()
