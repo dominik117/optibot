@@ -41,7 +41,7 @@ def normalize_corpus(conversations):
     Returns:
     list: List of normalized conversations.
     """
-    stop_words = set(nltk.corpus.stopwords.words('english'))
+    stop_words = nltk.corpus.stopwords.words('english')
     tokenizer = nltk.tokenize.RegexpTokenizer(r'\w+')
     lemmatizer = nltk.stem.wordnet.WordNetLemmatizer()
     norm_conversations = []
@@ -49,10 +49,13 @@ def normalize_corpus(conversations):
     for conversation in conversations:
         conversation = conversation.lower()
         conversation = re.sub(r'\{\{.*?\}\}', '', conversation)
-        tokens = [lemmatizer.lemmatize(token.strip()) for token in tokenizer.tokenize(conversation)
-                  if token not in stop_words and len(token) > 1 and not token.isnumeric()]
-        if tokens:
-            norm_conversations.append(tokens)
+        conversation_tokens = [token.strip() for token in tokenizer.tokenize(conversation)]
+        conversation_tokens = [lemmatizer.lemmatize(token) for token in conversation_tokens if not token.isnumeric()]
+        conversation_tokens = [token for token in conversation_tokens if len(token) > 1]
+        conversation_tokens = [token for token in conversation_tokens if token not in stop_words]
+        conversation_tokens = list(filter(None, conversation_tokens))
+        if conversation_tokens:
+            norm_conversations.append(conversation_tokens)
 
     return norm_conversations
 
@@ -149,25 +152,27 @@ def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_top
 class OptiBotTopicModeling:
     def __init__(self, df: pd.DataFrame, start_topic_count: int = 3, end_topic_count: int = 10):
         self.df = df
-        self.start_topic_count = max(int(start_topic_count), 2)  # Ensure at least 2 topics
+        self.start_topic_count = max(int(start_topic_count), 3)  # at least 3 topics
         self.end_topic_count = max(int(end_topic_count), self.start_topic_count + 1)  # At least one more than start
         self._best_lda_model = None
         self._bow_corpus = None
+        self._norm_conversations_bigrams = None
         self._topics_df: Optional[pd.DataFrame] = None
         self._coherence_df: Optional[pd.DataFrame] = None
-        self._corpus_topic_df: Optional[pd.DataFrame] = None
-        self.execution_time = None  # Attribute to track execution time
-        self.resource_usage = None  # Attribute to track resources used
+        self._corpus_topic_df: Optional[plt.figure] = None
+        self._coherence_plot: Optional[pd.DataFrame] = None
+        self.execution_time = None  
+        self.resource_usage = None  
 
     def fit(self):
         start_time = time.time()  
         initial_memory_use = psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024)  
         
         norm_conversations = normalize_corpus(self.df["conversation"].to_list())
-        self._bow_corpus, dictionary, norm_conversations_bigrams = gensim_build_bigrams_bow(norm_conversations)
-        lda_models, self._coherence_df, _ = topic_modeling_by_coherence(
+        self._bow_corpus, dictionary, self._norm_conversations_bigrams = gensim_build_bigrams_bow(norm_conversations)
+        lda_models, self._coherence_df, self._coherence_plot = topic_modeling_by_coherence(
             bow_corpus=self._bow_corpus,
-            conversations=norm_conversations_bigrams,
+            conversations=self._norm_conversations_bigrams,
             dictionary=dictionary,
             start_topic_count=self.start_topic_count,
             end_topic_count=self.end_topic_count
@@ -225,3 +230,9 @@ class OptiBotTopicModeling:
         if self._coherence_df is None:
             raise ValueError("Corpus topic not generated. Call 'fit' to generate corpus topics.")
         return self._coherence_df
+
+    @property
+    def coherence_plot(self) -> pd.DataFrame:
+        if self._coherence_plot is None:
+            raise ValueError("Corpus topic not generated. Call 'fit' to generate corpus topics.")
+        return self._coherence_plot
