@@ -75,7 +75,7 @@ This project began as a final project for the Generative AI class at the Univers
 
 ## References
 
-- Refer to the [References](./references/) folder for more on this project, including acknowledgements.
+Refer to the [References](./references/) folder for more on this project, including acknowledgements.
 
 
 
