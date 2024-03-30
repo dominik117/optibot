@@ -69,10 +69,6 @@ Follow the on-app instructions to interact with the application.
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.
 
-You can add a section at the end of the README titled "Acknowledgments" or "Background" where you give credit to the origins of the project and express gratitude to Dr. Marcel Blattner. Here's how you could incorporate this into your README:
-
----
-
 ## Background
 
 This project began as a final project for the Generative AI class at the University of Applied Sciences in Lucerne, imparted by [Dr. Marcel Blattner](https://www.linkedin.com/in/marcelblattner/). Thanks to Dr. Blattner for his guidance and insights throughout the development of Optibot.
