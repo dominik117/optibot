@@ -1,1 +1,2 @@
-from .load_data import *
+from . import main
+from . import load_data
