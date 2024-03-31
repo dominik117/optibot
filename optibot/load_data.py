@@ -46,7 +46,7 @@ def select_columns(df):
             "Select the column corresponding to the ChatBot's answer text:",
             [list(df.columns)]
         )
-        return merge_qa_columns(df, question_col, answer_col)
+        return merge_multiple_qa_columns(df, question_col, answer_col)
 
     if col_option == "Single Column":
         col = local_utils.ask_radio_question(
