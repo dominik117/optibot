@@ -4,12 +4,13 @@ import os
 from typing import Optional
 import pandas as pd
 import matplotlib.pyplot as plt
-import topic_modeling
+
+from . import topic_modeling
 
 plt.style.use('fivethirtyeight')
 plt.rcParams['figure.facecolor'] = 'white'
 
-class OptiBotTopicModeling:
+class OptiBotModeling:
     def __init__(self, df: pd.DataFrame, start_topic_count: int = 3, end_topic_count: int = 10):
         self.df = df
         self.start_topic_count = int(start_topic_count)
@@ -19,8 +20,7 @@ class OptiBotTopicModeling:
         self._norm_conversations_bigrams = None
         self._topics_df: Optional[pd.DataFrame] = None
         self._coherence_df: Optional[pd.DataFrame] = None
-        self._corpus_topic_df: Optional[plt.figure] = None
-        self._coherence_plot: Optional[pd.DataFrame] = None
+        self._corpus_topic_df: Optional[pd.DataFrame] = None
         self.best_number_topics = None
         self.best_coherence_score = None
         self.execution_time = None  
@@ -33,7 +33,7 @@ class OptiBotTopicModeling:
         norm_conversations = topic_modeling.normalize_corpus(self.df["conversation"].to_list())
         self._bow_corpus, dictionary, self._norm_conversations_bigrams = topic_modeling.gensim_build_bigrams_bow(norm_conversations)
 
-        lda_models, self._coherence_df, self._coherence_plot = topic_modeling.topic_modeling_by_coherence(
+        lda_models, self._coherence_df = topic_modeling.topic_modeling_by_coherence(
             bow_corpus=self._bow_corpus,
             conversations=self._norm_conversations_bigrams,
             dictionary=dictionary,
@@ -80,20 +80,39 @@ class OptiBotTopicModeling:
         self._corpus_topic_df['Conversation'] = self.df["conversation"]
 
     def show_coherence_plot(self, save=False):
-        if self.coherence_df is None:
-            raise ValueError("Topics not generated. Call 'fit' to generate topics.")
-        plt.figure(figsize=(12, 6))
-        plt.plot(range(self.start_topic_count, self.end_topic_count + 1, self.step), self.coherence_df["C_v Score"], c='r')
-        plt.axhline(y=0.5, c='k', linestyle='--', linewidth=2)
-        plt.xlabel('Number of Topics')
-        plt.ylabel('Coherence C_v Score')
-        plt.title('Topic Coherence')
-        plt.grid(True)
-        coherence_plot = plt.gcf()
-        if save:
-            coherence_plot.savefig('coherence_plot.png', bbox_inches='tight')
-        else:
-            coherence_plot.show()
+            if self.coherence_df is None:
+                raise ValueError("Topics not generated. Call 'fit' to generate topics.")
+        
+            fig, ax = plt.subplots(figsize=(12, 6))
+            ax.plot(range(self.start_topic_count, self.end_topic_count + 1, self.step), 
+                    self.coherence_df["C_v Score"], c='r')
+            ax.axhline(y=0.5, c='k', linestyle='--', linewidth=2)
+            ax.set_xlabel('Number of Topics')
+            ax.set_ylabel('Coherence C_v Score')
+            ax.set_title('Topic Coherence')
+            ax.set_facecolor('#f0f0f0')
+            fig.patch.set_facecolor('white')
+            ax.grid(True)
+            
+            if save:
+                fig.savefig('coherence_plot.png', bbox_inches='tight')
+            else:
+                plt.show()
+
+        # if self.coherence_df is None:
+        #     raise ValueError("Topics not generated. Call 'fit' to generate topics.")
+        # plt.figure(figsize=(12, 6))
+        # plt.plot(range(self.start_topic_count, self.end_topic_count + 1, self.step), self.coherence_df["C_v Score"], c='r')
+        # plt.axhline(y=0.5, c='k', linestyle='--', linewidth=2)
+        # plt.xlabel('Number of Topics')
+        # plt.ylabel('Coherence C_v Score')
+        # plt.title('Topic Coherence')
+        # plt.grid(True)
+        # coherence_plot = plt.gcf()
+        # if save:
+        #     coherence_plot.savefig('coherence_plot.png', bbox_inches='tight')
+        # else:
+        #     coherence_plot.show()
 
     @property
     def topics_df(self) -> pd.DataFrame:
