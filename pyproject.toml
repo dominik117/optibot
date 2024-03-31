@@ -13,6 +13,7 @@ seaborn = "0.13.1"
 gensim = "4.3.2"
 nltk = "3.8.1"
 psutil = "5.9.5"
+tqdm = "4.66.2"
 
 [tool.poetry.dev-dependencies]
 

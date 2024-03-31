@@ -16,8 +16,8 @@ def load_csv(data_file):
 #         print("Unsupported file format")
 #         return None
 
-def merge_qa_columns(df, question_col, answer_col):
-    df["conversation"] = "Question: " + df[question_col] + " Answer: " + df[answer_col]
+def merge_multiple_qa_columns(df, question_cols, answer_cols):
+    df['conversation'] = "Question: " + df[question_cols].apply(lambda x: ' '.join(x.astype(str)), axis=1) + " Answer: " + df[answer_cols].apply(lambda x: ' '.join(x.astype(str)), axis=1)
     return df
 
 def extract_unified_column(df, col):
