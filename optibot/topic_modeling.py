@@ -157,7 +157,7 @@ class OptiBotTopicModeling:
     def __init__(self, df: pd.DataFrame, start_topic_count: int = 3, end_topic_count: int = 10):
         self.df = df
         self.start_topic_count = int(start_topic_count)
-        self.end_topic_count = max(int(end_topic_count), self.start_topic_count + 1)  # At least one more than start
+        self.end_topic_count = int(end_topic_count)
         self._best_lda_model = None
         self._bow_corpus = None
         self._norm_conversations_bigrams = None
@@ -165,6 +165,8 @@ class OptiBotTopicModeling:
         self._coherence_df: Optional[pd.DataFrame] = None
         self._corpus_topic_df: Optional[plt.figure] = None
         self._coherence_plot: Optional[pd.DataFrame] = None
+        self.best_number_topics = None
+        self.best_coherence_score = None
         self.execution_time = None  
         self.resource_usage = None  
 
@@ -185,12 +187,15 @@ class OptiBotTopicModeling:
 
         best_model_idx = self._coherence_df['C_v Score'].idxmax()
         self._best_lda_model = lda_models[best_model_idx]
+        self.best_number_topics = self._coherence_df['Number of Topics'].iloc[best_model_idx]
+        self.best_coherence_score = self._coherence_df['C_v Score'].iloc[best_model_idx]
+
         lda_models = None # <-- Garbage collection
         self._fit_topics_on_data()
 
         end_memory_use = psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024) 
-        self.execution_time = time.time() - start_time  
-        self.resource_usage = end_memory_use - initial_memory_use  # in MB
+        self.execution_time = round(time.time() - start_time, 3) 
+        self.resource_usage = round(end_memory_use - initial_memory_use, 3)  # in MB
 
     def _fit_topics_on_data(self):
         # Check if the model is fitted
