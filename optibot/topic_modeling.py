@@ -8,16 +8,18 @@ import warnings
 import numpy as np
 import seaborn as sns
 from typing import Optional
+import tqdm
 
 import time
 import psutil
 import os
 
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
+nltk.download('wordnet', quiet=True)
 
 plt.style.use('fivethirtyeight')
+plt.rcParams['figure.facecolor'] = 'white'
 
 # Global Configuration for Gensim Bigrams
 MIN_COUNT = 20
@@ -46,7 +48,8 @@ def normalize_corpus(conversations):
     lemmatizer = nltk.stem.wordnet.WordNetLemmatizer()
     norm_conversations = []
 
-    for conversation in conversations:
+    print("Normalizing conversations: ")
+    for conversation in tqdm.tqdm(conversations):
         conversation = conversation.lower()
         conversation = re.sub(r'\{\{.*?\}\}', '', conversation)
         conversation_tokens = [token.strip() for token in tokenizer.tokenize(conversation)]
@@ -100,7 +103,8 @@ def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_top
     gensim_logger = logging.getLogger('gensim')
     gensim_logger.setLevel(logging.ERROR)
 
-    for num_topics in range(start_topic_count, end_topic_count + 1, step):
+    print("Fitting the n-topics iteration: ")
+    for num_topics in tqdm.tqdm(range(start_topic_count, end_topic_count + 1, step)):
         with warnings.catch_warnings(record=True) as caught_warnings:
             warnings.simplefilter("always")
             lda_model = gensim.models.LdaModel(corpus=bow_corpus, id2word=dictionary, chunksize=CHUNKSIZE,
@@ -170,6 +174,7 @@ class OptiBotTopicModeling:
         
         norm_conversations = normalize_corpus(self.df["conversation"].to_list())
         self._bow_corpus, dictionary, self._norm_conversations_bigrams = gensim_build_bigrams_bow(norm_conversations)
+
         lda_models, self._coherence_df, self._coherence_plot = topic_modeling_by_coherence(
             bow_corpus=self._bow_corpus,
             conversations=self._norm_conversations_bigrams,
