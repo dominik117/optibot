@@ -156,7 +156,7 @@ def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_top
 class OptiBotTopicModeling:
     def __init__(self, df: pd.DataFrame, start_topic_count: int = 3, end_topic_count: int = 10):
         self.df = df
-        self.start_topic_count = max(int(start_topic_count), 3)  # at least 3 topics
+        self.start_topic_count = int(start_topic_count)
         self.end_topic_count = max(int(end_topic_count), self.start_topic_count + 1)  # At least one more than start
         self._best_lda_model = None
         self._bow_corpus = None
