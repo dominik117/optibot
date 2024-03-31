@@ -5,8 +5,9 @@ import pandas as pd
 import logging
 import warnings
 import numpy as np
-import config as cfg
 import tqdm
+
+from . import config as cfg
 
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
@@ -118,5 +119,3 @@ def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_top
     })
 
     return lda_models, coherence_df
-
-
