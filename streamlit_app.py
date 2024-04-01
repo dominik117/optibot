@@ -2,9 +2,10 @@ import streamlit as st
 import optibot as ob 
 import time
 import threading
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 import os
+from zoneinfo import ZoneInfo
 
 load_dotenv()
 st.session_state['api_key'] = os.getenv('OPENAI_API_KEY')
@@ -58,8 +59,10 @@ if data_file is not None:
 
         if st.session_state['column_selection_done'] and st.session_state['context']:
             st.write("The chatbot conversations have been selected, initiating analysis.")
-            current_time = datetime.now()
-            formatted_time = current_time.strftime("%A, %B %d, %Y %H:%M")
+
+            current_time = datetime.now(tz=timezone.utc)
+            zurich_time = current_time.astimezone(ZoneInfo("Europe/Zurich"))
+            formatted_time = zurich_time.strftime("%A, %B %d, %Y %H:%M %Z")
             st.write("Analysis started at: ", formatted_time)
             st.write("The estimated time for this analysis is usually around 2 hours. Please be patient.")
 
