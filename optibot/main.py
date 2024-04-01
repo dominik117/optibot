@@ -4,7 +4,7 @@ from .optibot_modeling import OptiBotModeling
 import time
 
 def run_optibot(df, api_key, context):
-    topics = OptiBotModeling(df, api_key, context, start_topic_count=4, end_topic_count=15)
+    topics = OptiBotModeling(df, api_key, context, start_topic_count=6, end_topic_count=9)
     topics.fit()
     print("Analysis completed")
     return topics
