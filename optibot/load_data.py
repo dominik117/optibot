@@ -6,16 +6,6 @@ def load_csv(data_file):
     """Load a CSV file into a DataFrame."""
     return pd.read_csv(data_file)
 
-# def upload_data():
-#     """Open a file dialog to select a data file and load it into a pandas DataFrame."""
-#     Tk().withdraw()  # We don't want a full GUI, so keep the root window from appearing
-#     filename = filedialog.askopenfilename()  # Show an "Open" dialog box and return the path to the selected file
-#     if filename.endswith('.csv'):
-#         return pd.read_csv(filename)
-#     else:
-#         print("Unsupported file format")
-#         return None
-
 def merge_multiple_qa_columns(df, question_cols, answer_cols):
     df['conversation'] = "Question: " + df[question_cols].apply(lambda x: ' '.join(x.astype(str)), axis=1) + " Answer: " + df[answer_cols].apply(lambda x: ' '.join(x.astype(str)), axis=1)
     return df
@@ -23,7 +13,6 @@ def merge_multiple_qa_columns(df, question_cols, answer_cols):
 def extract_unified_column(df, col):
     df["conversation"] = df[col]
     return df
-
 
 def select_columns(df):
     """Ask the user to select columns for analysis."""
