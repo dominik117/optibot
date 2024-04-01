@@ -6,25 +6,38 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from . import topic_modeling
+from . import llm_topic_labeling
 
 plt.style.use('fivethirtyeight')
 plt.rcParams['figure.facecolor'] = 'white'
 
 class OptiBotModeling:
-    def __init__(self, df: pd.DataFrame, start_topic_count: int = 3, end_topic_count: int = 10):
+    def __init__(self, 
+                 df: pd.DataFrame, 
+                 api_key, 
+                 context: str = "chatbot conversations", 
+                 start_topic_count: int = 3, 
+                 end_topic_count: int = 10, 
+                 step: int = 1):
+        
         self.df = df
+        self.api_key = api_key
+        self.context: Optional[str] = context
         self.start_topic_count = int(start_topic_count)
         self.end_topic_count = int(end_topic_count)
+        self.step = int(step)
         self._best_lda_model = None
         self._bow_corpus = None
         self._norm_conversations_bigrams = None
         self._topics_df: Optional[pd.DataFrame] = None
+        self._topics_df_as_list: Optional[pd.DataFrame] = None
         self._coherence_df: Optional[pd.DataFrame] = None
         self._corpus_topic_df: Optional[pd.DataFrame] = None
         self.best_number_topics = None
         self.best_coherence_score = None
         self.execution_time = None  
         self.resource_usage = None  
+
 
     def fit(self):
         start_time = time.time()  
@@ -68,16 +81,35 @@ class OptiBotModeling:
                              columns=['Terms per Topic'],
                              index=['Topic'+str(t) for t in range(1, self._best_lda_model.num_topics+1)]
                              )
+        
+        
+        self._topics_df_as_list = pd.DataFrame([[topic] for topic in [[term for term, wt in topic] for topic in topics]],
+                                  columns=['Terms per Topic'],
+                                  index=['Topic'+str(t) for t in range(1, self._best_lda_model.num_topics+1)])
 
         tm_results = self._best_lda_model[self._bow_corpus]
         corpus_topics = [sorted(topics, key=lambda record: -record[1])[0]
                             for topics in tm_results]
 
+        # Integrate topic modeling results into original conversations
         self._corpus_topic_df = pd.DataFrame()
         self._corpus_topic_df['Dominant Topic'] = [item[0]+1 for item in corpus_topics]
         self._corpus_topic_df['Contribution %'] = [round(item[1]*100, 2) for item in corpus_topics]
         self._corpus_topic_df['Topic Desc'] = [self._topics_df.iloc[t[0]]['Terms per Topic'] for t in corpus_topics]
         self._corpus_topic_df['Conversation'] = self.df["conversation"]
+
+        # Generate topic labels
+        topics_keywords_as_list = self._topics_df_as_list.to_dict()["Terms per Topic"]
+        topic_labels = llm_topic_labeling.generate_topic_labels(self.api_key, topics_keywords_as_list, self.context)
+        def map_topic_label(topic_number):
+            return topic_labels.get(f"Topic{topic_number}", "Unknown Topic")
+        
+        self._corpus_topic_df['Topic Label'] = self._corpus_topic_df['Dominant Topic'].apply(map_topic_label)
+        self._corpus_topic_df.insert(1, 'Topic Label', self._corpus_topic_df.pop('Topic Label'))
+
+        self._topics_df['Topic Label'] = self._topics_df.index.map(topic_labels)
+        self._topics_df.insert(1, 'Topic Label', self._topics_df.pop('Topic Label'))
+
 
     def show_coherence_plot(self, save=False):
             if self.coherence_df is None:
@@ -99,26 +131,17 @@ class OptiBotModeling:
             else:
                 plt.show()
 
-        # if self.coherence_df is None:
-        #     raise ValueError("Topics not generated. Call 'fit' to generate topics.")
-        # plt.figure(figsize=(12, 6))
-        # plt.plot(range(self.start_topic_count, self.end_topic_count + 1, self.step), self.coherence_df["C_v Score"], c='r')
-        # plt.axhline(y=0.5, c='k', linestyle='--', linewidth=2)
-        # plt.xlabel('Number of Topics')
-        # plt.ylabel('Coherence C_v Score')
-        # plt.title('Topic Coherence')
-        # plt.grid(True)
-        # coherence_plot = plt.gcf()
-        # if save:
-        #     coherence_plot.savefig('coherence_plot.png', bbox_inches='tight')
-        # else:
-        #     coherence_plot.show()
-
     @property
     def topics_df(self) -> pd.DataFrame:
         if self._topics_df is None:
             raise ValueError("Topics not generated. Call 'fit' to generate topics.")
         return self._topics_df
+    
+    @property
+    def topics_df_as_list(self) -> pd.DataFrame:
+        if self._topics_df is None:
+            raise ValueError("Topics not generated. Call 'fit' to generate topics.")
+        return self._topics_df_as_list
 
     @property
     def corpus_topic_df(self) -> pd.DataFrame:
