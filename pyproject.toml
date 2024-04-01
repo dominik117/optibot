@@ -16,6 +16,7 @@ psutil = "5.9.5"
 tqdm = "4.66.2"
 openai = "^1.14.3"
 python-dotenv = "^1.0.1"
+plotly = "5.15.0"
 
 [tool.poetry.dev-dependencies]
 
