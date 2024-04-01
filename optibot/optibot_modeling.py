@@ -108,7 +108,7 @@ class OptiBotModeling:
         self._corpus_topic_df.insert(1, 'Topic Label', self._corpus_topic_df.pop('Topic Label'))
 
         self._topics_df['Topic Label'] = self._topics_df.index.map(topic_labels)
-        self._topics_df.insert(1, 'Topic Label', self._topics_df.pop('Topic Label'))
+        self._topics_df.insert(0, 'Topic Label', self._topics_df.pop('Topic Label'))
 
 
     def show_coherence_plot(self, save=False):
