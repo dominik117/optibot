@@ -1,12 +1,5 @@
-from openai import OpenAI
 
-def create_openai_client(api_key):
-    client = OpenAI(api_key=api_key)
-    return client
-
-def generate_topic_labels(api_key, topics_keywords_as_list, context="chatbot conversations"):
-    client = create_openai_client(api_key)
-
+def generate_topic_labels(client, topics_keywords_as_list, context="chatbot conversations"):
     existing_labels = []
     topic_labels = {}
 
