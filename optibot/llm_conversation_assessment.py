@@ -14,11 +14,11 @@ def evaluate_response(client, corpus_row, context="chatbot conversations"):
         "5. Tone (is the response engaging and appropriately toned?). "
         "Rate each criterion on a scale of 1 to 5 and give a very short and concise assessment"
         "Respnse format should strictly be as the following example: "
-        "1: score "
-        "2: score "
-        "3: score "
-        "4: score "
-        "5: score "
+        "1: score \n"
+        "2: score \n"
+        "3: score \n"
+        "4: score \n"
+        "5: score \n"
         "Assessment: short and concise assessment. "
     ).format(
         context = context
@@ -65,7 +65,7 @@ def parse_llm_evaluation(row):
     return pd.Series(scores)
 
 
-def fit_response_valuation(client, df, context="chatbot conversations"):
+def fit_response_assessment(client, df, context="chatbot conversations"):
     df = df.reset_index(drop=True)
     df['LLM Evaluation'] = df.apply(lambda row: evaluate_response(client, row, context), axis=1)
     score_columns = df.apply(parse_llm_evaluation, axis=1)
