@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 
 def summarize_assessments(client, topic_label, df, context):
-    assessments = " ".join(df[df['Topic Label'] == topic_label]['Assessment'].tolist())
-    max_length = 2048
+    assessments = " ".join(str(assessment) for assessment in df[df['Topic Label'] == topic_label]['Assessment'].tolist())
+    max_length = 5000 #2000
     if len(assessments) > max_length:
         assessments = assessments[:max_length]
 
