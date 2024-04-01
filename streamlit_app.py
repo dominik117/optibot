@@ -61,7 +61,7 @@ if data_file is not None:
             current_time = datetime.now()
             formatted_time = current_time.strftime("%A, %B %d, %Y %H:%M")
             st.write("Analysis started at: ", formatted_time)
-            st.write("The estimated time for this analysis is usually around 15 minutes. Please be patient.")
+            st.write("The estimated time for this analysis is usually around 2 hours. Please be patient.")
 
             st_run_optibot(st.session_state['result_df'], st.session_state['api_key'], st.session_state['context'])
 
@@ -72,7 +72,7 @@ if data_file is not None:
             st.header("Results")
 
             st.subheader("Optimal Number of Topics")
-            st.pyplot(topics.coherence_plot)
+            st.pyplot(topics.show_coherence_plot())
             st.caption("The optimal number of topics is determined by the highest coherence score.")
 
             st.subheader("Topic Modeling Results")
