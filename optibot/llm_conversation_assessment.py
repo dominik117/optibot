@@ -66,10 +66,8 @@ def parse_llm_evaluation(row):
 
 
 def fit_response_valuation(client, df, context="chatbot conversations"):
-    df = df.sample(22).reset_index(drop=True)
+    df = df.reset_index(drop=True)
     df['LLM Evaluation'] = df.apply(lambda row: evaluate_response(client, row, context), axis=1)
-    # Parse the response evaluations
-
     score_columns = df.apply(parse_llm_evaluation, axis=1)
     df = pd.concat([df, score_columns], axis=1)
     df = df.drop('LLM Evaluation', axis=1)
