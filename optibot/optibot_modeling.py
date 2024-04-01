@@ -43,7 +43,6 @@ class OptiBotModeling:
         self.execution_time = None  
         self.resource_usage = None  
 
-
     def fit(self):
         start_time = time.time()  
         initial_memory_use = psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024)  
@@ -76,6 +75,7 @@ class OptiBotModeling:
         if self._best_lda_model is None:
             raise ValueError("Model not fitted. Call 'fit' before this method.")
 
+        print("Fitting topics on the data...")
         # Topic term extraction and dataframe creation
         topics = [[(term, round(wt, 3))
                     for term, wt in self._best_lda_model.show_topic(n, topn=20)]
@@ -86,7 +86,6 @@ class OptiBotModeling:
                              columns=['Terms per Topic'],
                              index=['Topic'+str(t) for t in range(1, self._best_lda_model.num_topics+1)]
                              )
-        
         
         self._topics_df_as_list = pd.DataFrame([[topic] for topic in [[term for term, wt in topic] for topic in topics]],
                                   columns=['Terms per Topic'],
@@ -105,6 +104,7 @@ class OptiBotModeling:
         # Generate topic labels using the LLM
         client = clients.create_openai_client(self.api_key)
 
+        print("Generating topic labels...")
         topics_keywords_as_list = self._topics_df_as_list.to_dict()["Terms per Topic"]
         topic_labels = llm_topic_labeling.generate_topic_labels(client, topics_keywords_as_list, self.context)
         def map_topic_label(topic_number):
@@ -112,24 +112,22 @@ class OptiBotModeling:
         
         self._corpus_topic_df['Topic Label'] = self._corpus_topic_df['Dominant Topic'].apply(map_topic_label)
         self._corpus_topic_df.insert(1, 'Topic Label', self._corpus_topic_df.pop('Topic Label'))
-
         self._topics_df['Topic Label'] = self._topics_df.index.map(topic_labels)
         self._topics_df.insert(0, 'Topic Label', self._topics_df.pop('Topic Label'))
 
         # Assess the conversation responses with the LLM
-        self._assessed_conversations_df = llm_conversation_assessment.fit_response_valuation(client, self._corpus_topic_df.sample(23), self.context)
+        print("Assessing conversation responses...")
+        self._assessed_conversations_df = llm_conversation_assessment.fit_response_assessment(client, self._corpus_topic_df.sample(500), self.context)
 
     def show_coherence_plot(self, save=False):
         if self.coherence_df is None:
             raise ValueError("Topics not generated. Call 'fit' to generate topics.")
         
-        # Extract the coherence scores and compute the highest point
         coherence_scores = self.coherence_df["C_v Score"]
         max_score_index = coherence_scores.idxmax()
         max_score = coherence_scores[max_score_index]
         max_score_topic = self.start_topic_count + self.step * max_score_index
         
-        # Create the plot
         fig, ax = plt.subplots(figsize=(12, 6))
         x_values = range(self.start_topic_count, self.end_topic_count + 1, self.step)
         ax.plot(x_values, coherence_scores, c='r')
@@ -141,7 +139,6 @@ class OptiBotModeling:
         fig.patch.set_facecolor('white')
         ax.grid(True)
         ax.scatter(max_score_topic, max_score, s=500, edgecolors='blue', facecolors='none', linewidths=5, zorder=5) #color='blue', 
-        
         if save:
             fig.savefig('coherence_plot.png', bbox_inches='tight')
         
@@ -153,12 +150,10 @@ class OptiBotModeling:
         topic_group['Percentage'] = (topic_group['Count'] / topic_group['Count'].sum()) * 100
         topic_group['Label'] = topic_group['Dominant Topic'].astype(str) + ' ' + topic_group['Topic Label']
         topic_group = topic_group.sort_values(by='Percentage', ascending=False)
-
         fig = px.bar(topic_group, x='Label', y='Count',
                     text=np.round(topic_group['Percentage'], 2), 
                     labels={'Count': 'Count', 'Label': 'Topic'},
                     title='')
-
         fig.update_traces(texttemplate='%{text}%', textposition='outside',
                         hovertemplate='<b>Topic Number</b>: %{x}<br>' +
                                         '<b>Topic Label</b>: %{customdata}<br>' +
@@ -167,17 +162,23 @@ class OptiBotModeling:
                         customdata=topic_group['Topic Label'],
                         hoverlabel=dict(font=dict(size=17)),
                         marker_color='#4C72B0')
+        fig.update_layout(
+            xaxis_title='Topic Number',
+            yaxis_title='Count',
+            plot_bgcolor='#f0f0f0',
+            paper_bgcolor='white',
+            margin=dict(l=40, r=40, t=40, b=40),
+            xaxis={'tickmode': 'array',
+                'tickvals': topic_group['Label'],
+                'ticktext': [f"{row['Dominant Topic']}" for _, row in topic_group.iterrows()],
+                'title_font': {'color': 'black'},
+                'tickfont': {'color': 'black'}},
+            yaxis={'title_font': {'color': 'black'},
+                'tickfont': {'color': 'black'}},
+            title={'text': 'Distribution of Topics by Label', 'font': {'color': 'black'}}
+        )
 
-        fig.update_layout(xaxis_title='Topic Number', yaxis_title='Count',
-                        #width=1200, height=600, 
-                        paper_bgcolor='white',
-                        plot_bgcolor='#f0f0f0',  
-                        margin=dict(l=40, r=40, t=40, b=40),  # Reduce margins 
-                        xaxis={'tickmode': 'array',
-                                'tickvals': topic_group['Label'],
-                                'ticktext': [f"{row['Dominant Topic']}" for _, row in topic_group.iterrows()]})
         return fig
-
 
     @property
     def topics_df(self) -> pd.DataFrame:
