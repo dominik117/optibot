@@ -4,9 +4,13 @@ import os
 from typing import Optional
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.express as px
+import numpy as np
 
 from . import topic_modeling
 from . import llm_topic_labeling
+from . import clients
+from . import llm_conversation_assessment
 
 plt.style.use('fivethirtyeight')
 plt.rcParams['figure.facecolor'] = 'white'
@@ -33,6 +37,7 @@ class OptiBotModeling:
         self._topics_df_as_list: Optional[pd.DataFrame] = None
         self._coherence_df: Optional[pd.DataFrame] = None
         self._corpus_topic_df: Optional[pd.DataFrame] = None
+        self._assessed_conversations_df: Optional[pd.DataFrame] = None
         self.best_number_topics = None
         self.best_coherence_score = None
         self.execution_time = None  
@@ -95,12 +100,13 @@ class OptiBotModeling:
         self._corpus_topic_df = pd.DataFrame()
         self._corpus_topic_df['Dominant Topic'] = [item[0]+1 for item in corpus_topics]
         self._corpus_topic_df['Contribution %'] = [round(item[1]*100, 2) for item in corpus_topics]
-        self._corpus_topic_df['Topic Desc'] = [self._topics_df.iloc[t[0]]['Terms per Topic'] for t in corpus_topics]
         self._corpus_topic_df['Conversation'] = self.df_conversation
 
-        # Generate topic labels
+        # Generate topic labels using the LLM
+        client = clients.create_openai_client(self.api_key)
+
         topics_keywords_as_list = self._topics_df_as_list.to_dict()["Terms per Topic"]
-        topic_labels = llm_topic_labeling.generate_topic_labels(self.api_key, topics_keywords_as_list, self.context)
+        topic_labels = llm_topic_labeling.generate_topic_labels(client, topics_keywords_as_list, self.context)
         def map_topic_label(topic_number):
             return topic_labels.get(f"Topic{topic_number}", "Unknown Topic")
         
@@ -110,6 +116,8 @@ class OptiBotModeling:
         self._topics_df['Topic Label'] = self._topics_df.index.map(topic_labels)
         self._topics_df.insert(0, 'Topic Label', self._topics_df.pop('Topic Label'))
 
+        # Assess the conversation responses with the LLM
+        self._assessed_conversations_df = llm_conversation_assessment.fit_response_valuation(client, self._corpus_topic_df.sample(23), self.context)
 
     def show_coherence_plot(self, save=False):
         if self.coherence_df is None:
@@ -138,6 +146,38 @@ class OptiBotModeling:
             fig.savefig('coherence_plot.png', bbox_inches='tight')
         
         return fig
+    
+    def show_topic_distribution_plot(self, save=False):
+        df_plot = self._corpus_topic_df
+        topic_group = df_plot.groupby(['Dominant Topic', 'Topic Label']).size().reset_index(name='Count')
+        topic_group['Percentage'] = (topic_group['Count'] / topic_group['Count'].sum()) * 100
+        topic_group['Label'] = topic_group['Dominant Topic'].astype(str) + ' ' + topic_group['Topic Label']
+        topic_group = topic_group.sort_values(by='Percentage', ascending=False)
+
+        fig = px.bar(topic_group, x='Label', y='Count',
+                    text=np.round(topic_group['Percentage'], 2), 
+                    labels={'Count': 'Count', 'Label': 'Topic'},
+                    title='')
+
+        fig.update_traces(texttemplate='%{text}%', textposition='outside',
+                        hovertemplate='<b>Topic Number</b>: %{x}<br>' +
+                                        '<b>Topic Label</b>: %{customdata}<br>' +
+                                        '<b>Count</b>: %{y} of ' + str(topic_group['Count'].sum()) + '<br>' +
+                                        '<b>Percentage</b>: %{text}%',
+                        customdata=topic_group['Topic Label'],
+                        hoverlabel=dict(font=dict(size=17)),
+                        marker_color='#4C72B0')
+
+        fig.update_layout(xaxis_title='Topic Number', yaxis_title='Count',
+                        #width=1200, height=600, 
+                        paper_bgcolor='white',
+                        plot_bgcolor='#f0f0f0',  
+                        margin=dict(l=40, r=40, t=40, b=40),  # Reduce margins 
+                        xaxis={'tickmode': 'array',
+                                'tickvals': topic_group['Label'],
+                                'ticktext': [f"{row['Dominant Topic']}" for _, row in topic_group.iterrows()]})
+        return fig
+
 
     @property
     def topics_df(self) -> pd.DataFrame:
@@ -168,3 +208,9 @@ class OptiBotModeling:
         if self._coherence_plot is None:
             raise ValueError("Corpus topic not generated. Call 'fit' to generate corpus topics.")
         return self._coherence_plot
+    
+    @property
+    def assessed_conversations_df(self) -> pd.DataFrame:
+        if self._assessed_conversations_df is None:
+            raise ValueError("ACorpus topic not generated. Call 'fit' to generate corpus topics.")
+        return self._assessed_conversations_df
