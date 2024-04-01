@@ -56,7 +56,7 @@ To run in a Streamlit App:
 poetry run optibot
 ```
 
-To run in the terminal:
+To run in the terminal (Currently under development):
 
 ```bash
 poetry run optibot-terminal
