@@ -56,6 +56,9 @@ def parse_llm_evaluation(row):
         scores['Conciseness'] = int(lines[3].split(':')[1].strip())
         scores['Tone'] = int(lines[4].split(':')[1].strip())
 
+        score_values = [scores['Relevance'], scores['Accuracy'], scores['Completeness'], scores['Conciseness'], scores['Tone']]
+        scores['Average Score'] = sum(score_values) / len(score_values)
+
         assessment_index = [i for i, s in enumerate(lines) if 'Assessment:' in s][0]
         scores['Assessment'] = lines[assessment_index].split(':', 1)[1].strip()
 
