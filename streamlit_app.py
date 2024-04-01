@@ -83,11 +83,13 @@ if data_file is not None:
             st.dataframe(topics.topics_df)
             st.caption("The table shows the top words for each topic and their labels.")
 
+            st.subheader("Conversation Assessment")
+            st.dataframe(topics._assessed_conversations_df.sample(20))
+            st.caption("The table shows a sample of the final topic labeling and assessment of the conversations.")
+
             st.subheader("Topic Distribution")
-            st.dataframe(topics.corpus_topic_df.sample(20))
-            st.caption("The table shows the distribution of topics and their labels in the corpus, with a sample of 20 random conversations.")
-
-
+            st.plotly_chart(topics.show_topic_distribution_plot())
+            st.caption("The plot shows the distribution of topics across the conversations.")
 
 
 
