@@ -13,6 +13,7 @@ st.session_state['api_key'] = os.getenv('OPENAI_API_KEY')
 def st_run_optibot(df, api_key, context):
     topics = ob.main.run_optibot(df, api_key, context)
     st.session_state['topics'] = topics
+    st.session_state['analysis_done'] = True
     
 
 st.title('OptiBot Optimization')
@@ -57,7 +58,7 @@ if data_file is not None:
         if 'context' not in st.session_state or not st.session_state['context']:     
             st.session_state['context'] = st.text_input("In 1 to 5 words, what is the context of the conversations?")
 
-        if st.session_state['column_selection_done'] and st.session_state['context']:
+        if st.session_state['column_selection_done'] and st.session_state['context'] and not st.session_state.get('analysis_done', False):
             st.write("The chatbot conversations have been selected, initiating analysis.")
 
             current_time = datetime.now(tz=timezone.utc)
