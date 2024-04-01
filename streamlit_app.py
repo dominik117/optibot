@@ -91,6 +91,16 @@ if data_file is not None:
             st.plotly_chart(topics.show_topic_distribution_plot())
             st.caption("The plot shows the distribution of topics across the conversations.")
 
+            st.subheader("Final Insights")
+            self_final_insights = topics.final_insights
+            for topic, content in self_final_insights.items():
+                st.markdown(f"<h4>Topic: {topic}</h4>", unsafe_allow_html=True)
+                st.write(f"Insight: {content['summary']}")  
+                st.pyplot(content['figure'])
+                st.caption("The figure shows the average scores for each criterion in the assessment.")
+                break_line = st.empty()
+                break_line.write("---")
+
 
 
 
