@@ -60,7 +60,7 @@ def generate_topic_labels(api_key, topics_keywords_as_list, context="chatbot con
         ).format(
             context=context)
 
-        prompt = f"Considering all the topic labels and their keywords, suggest an improved label or keep the current label for {topic}."
+        prompt = f"Considering all the topic labels and their keywords, suggest an improved label or keep the current label for {topic}. Only respond with the label name."
 
         review_completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
