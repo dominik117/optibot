@@ -46,7 +46,15 @@ def evaluate_response(client, corpus_row, context="chatbot conversations"):
     return response
 
 def parse_llm_evaluation(row):
-    scores = {'Relevance': None, 'Accuracy': None, 'Completeness': None, 'Conciseness': None, 'Tone': None, 'Assessment': None}
+    scores = {
+        'Relevance': None,
+        'Accuracy': None,
+        'Completeness': None,
+        'Conciseness': None,
+        'Tone': None,
+        'Average Score': None, 
+        'Assessment': None
+    }
     
     try:
         lines = row['LLM Evaluation'].split('\n')
