@@ -11,6 +11,7 @@ from . import topic_modeling
 from . import llm_topic_labeling
 from . import clients
 from . import llm_conversation_assessment
+from . import llm_final_insights
 
 plt.style.use('fivethirtyeight')
 plt.rcParams['figure.facecolor'] = 'white'
@@ -38,6 +39,7 @@ class OptiBotModeling:
         self._coherence_df: Optional[pd.DataFrame] = None
         self._corpus_topic_df: Optional[pd.DataFrame] = None
         self._assessed_conversations_df: Optional[pd.DataFrame] = None
+        self._final_insights: Optional[dict] = None
         self.best_number_topics = None
         self.best_coherence_score = None
         self.execution_time = None  
@@ -119,6 +121,12 @@ class OptiBotModeling:
         print("Assessing conversation responses...")
         self._assessed_conversations_df = llm_conversation_assessment.fit_response_assessment(client, self._corpus_topic_df.sample(500), self.context)
 
+        # Generate final insights
+        print("Generating final insights...")
+        self._final_insights = llm_final_insights.analyze_topics(self._assessed_conversations_df, client, 3, 'worst')
+
+        print("Modeling completed.")
+
     def show_coherence_plot(self, save=False):
         if self.coherence_df is None:
             raise ValueError("Topics not generated. Call 'fit' to generate topics.")
@@ -154,14 +162,17 @@ class OptiBotModeling:
                     text=np.round(topic_group['Percentage'], 2), 
                     labels={'Count': 'Count', 'Label': 'Topic'},
                     title='')
-        fig.update_traces(texttemplate='%{text}%', textposition='outside',
-                        hovertemplate='<b>Topic Number</b>: %{x}<br>' +
-                                        '<b>Topic Label</b>: %{customdata}<br>' +
-                                        '<b>Count</b>: %{y} of ' + str(topic_group['Count'].sum()) + '<br>' +
-                                        '<b>Percentage</b>: %{text}%',
-                        customdata=topic_group['Topic Label'],
-                        hoverlabel=dict(font=dict(size=17)),
-                        marker_color='#4C72B0')
+
+        fig.update_traces(
+                            texttemplate='%{text}%', textposition='outside',
+                            textfont=dict(color='black'),
+                            hovertemplate='<b>Topic Number</b>: %{x}<br>' +
+                                            '<b>Topic Label</b>: %{customdata}<br>' +
+                                            '<b>Count</b>: %{y} of ' + str(topic_group['Count'].sum()) + '<br>' +
+                                            '<b>Percentage</b>: %{text}%',
+                            customdata=topic_group['Topic Label'],
+                            hoverlabel=dict(font=dict(size=17)),
+                            marker_color='#4C72B0')
         fig.update_layout(
             xaxis_title='Topic Number',
             yaxis_title='Count',
@@ -175,7 +186,7 @@ class OptiBotModeling:
                 'tickfont': {'color': 'black'}},
             yaxis={'title_font': {'color': 'black'},
                 'tickfont': {'color': 'black'}},
-            title={'text': 'Distribution of Topics by Label', 'font': {'color': 'black'}}
+            #title={'text': 'Distribution of Topics by Label', 'font': {'color': 'black'}}
         )
 
         return fig
@@ -215,3 +226,9 @@ class OptiBotModeling:
         if self._assessed_conversations_df is None:
             raise ValueError("ACorpus topic not generated. Call 'fit' to generate corpus topics.")
         return self._assessed_conversations_df
+    
+    @property
+    def final_insights(self) -> dict:
+        if self._final_insights is None:
+            raise ValueError("Final insights not generated. Call 'fit' to generate final insights.")
+        return self._final_insights
