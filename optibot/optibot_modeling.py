@@ -20,7 +20,7 @@ class OptiBotModeling:
                  end_topic_count: int = 10, 
                  step: int = 1):
         
-        self.df = df
+        self.df_conversation = df["conversation"].to_list()
         self.api_key = api_key
         self.context: Optional[str] = context
         self.start_topic_count = int(start_topic_count)
@@ -43,7 +43,7 @@ class OptiBotModeling:
         start_time = time.time()  
         initial_memory_use = psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024)  
         
-        norm_conversations = topic_modeling.normalize_corpus(self.df["conversation"].to_list())
+        norm_conversations = topic_modeling.normalize_corpus(self.df_conversation)
         self._bow_corpus, dictionary, self._norm_conversations_bigrams = topic_modeling.gensim_build_bigrams_bow(norm_conversations)
 
         lda_models, self._coherence_df = topic_modeling.topic_modeling_by_coherence(
@@ -96,7 +96,7 @@ class OptiBotModeling:
         self._corpus_topic_df['Dominant Topic'] = [item[0]+1 for item in corpus_topics]
         self._corpus_topic_df['Contribution %'] = [round(item[1]*100, 2) for item in corpus_topics]
         self._corpus_topic_df['Topic Desc'] = [self._topics_df.iloc[t[0]]['Terms per Topic'] for t in corpus_topics]
-        self._corpus_topic_df['Conversation'] = self.df["conversation"]
+        self._corpus_topic_df['Conversation'] = self.df_conversation
 
         # Generate topic labels
         topics_keywords_as_list = self._topics_df_as_list.to_dict()["Terms per Topic"]
@@ -112,24 +112,32 @@ class OptiBotModeling:
 
 
     def show_coherence_plot(self, save=False):
-            if self.coherence_df is None:
-                raise ValueError("Topics not generated. Call 'fit' to generate topics.")
+        if self.coherence_df is None:
+            raise ValueError("Topics not generated. Call 'fit' to generate topics.")
         
-            fig, ax = plt.subplots(figsize=(12, 6))
-            ax.plot(range(self.start_topic_count, self.end_topic_count + 1, self.step), 
-                    self.coherence_df["C_v Score"], c='r')
-            ax.axhline(y=0.5, c='k', linestyle='--', linewidth=2)
-            ax.set_xlabel('Number of Topics')
-            ax.set_ylabel('Coherence C_v Score')
-            ax.set_title('Topic Coherence')
-            ax.set_facecolor('#f0f0f0')
-            fig.patch.set_facecolor('white')
-            ax.grid(True)
-            
-            if save:
-                fig.savefig('coherence_plot.png', bbox_inches='tight')
-            else:
-                plt.show()
+        # Extract the coherence scores and compute the highest point
+        coherence_scores = self.coherence_df["C_v Score"]
+        max_score_index = coherence_scores.idxmax()
+        max_score = coherence_scores[max_score_index]
+        max_score_topic = self.start_topic_count + self.step * max_score_index
+        
+        # Create the plot
+        fig, ax = plt.subplots(figsize=(12, 6))
+        x_values = range(self.start_topic_count, self.end_topic_count + 1, self.step)
+        ax.plot(x_values, coherence_scores, c='r')
+        ax.axhline(y=0.5, c='k', linestyle='--', linewidth=2)
+        ax.set_xlabel('Number of Topics')
+        ax.set_ylabel('Coherence C_v Score')
+        ax.set_title('Topic Coherence')
+        ax.set_facecolor('#f0f0f0')
+        fig.patch.set_facecolor('white')
+        ax.grid(True)
+        ax.scatter(max_score_topic, max_score, s=500, edgecolors='blue', facecolors='none', linewidths=5, zorder=5) #color='blue', 
+        
+        if save:
+            fig.savefig('coherence_plot.png', bbox_inches='tight')
+        
+        return fig
 
     @property
     def topics_df(self) -> pd.DataFrame:
