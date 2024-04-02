@@ -10,9 +10,8 @@ def run_optibot(df, api_key, context):
     return topics
 
 def main():
-    df = load_data.upload_data()
-    if df is not None:
-        selected_df = load_data.select_columns(df)
+    print("Termnal support under development, for the Streamlit version, please run: poetry run optibot")
+    print("Thank you for your understanding.")
 
 def main_streamlit(df=None):
     return None
