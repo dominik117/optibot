@@ -10,7 +10,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 Before you begin, ensure you have the following installed:
 
-- Python 3.8 or higher
+- Python 3.10 or higher. Python 3.12 is recommended.
 - pipx (Python package installer)
 
 ### Installation
@@ -67,7 +67,7 @@ Follow the on-app instructions to interact with the application.
 
 ## License
 
-This project is licensed under the MIT License - see the `LICENSE` file for details.
+See the `LICENSE` file for details.
 
 ## Background
 
@@ -75,7 +75,7 @@ This project began as a final project for the Generative AI class at the Univers
 
 ## References
 
-Refer to the [References](./references/) folder for more on this project, including acknowledgements.
+Refer to the [References](./references/) folder for more on this project.
 
 
 

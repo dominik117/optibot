@@ -3,7 +3,7 @@ name = "optibot"
 version = "0.1.0"
 description = "OptiBot enhances chatbot interactions using NLP and machine learning to identify and address common response issues, boosting accuracy and user satisfaction."
 authors = ["Dominik Bacher <dominikbacher@icloud.com>"]
-license = "MIT"
+license = "All Rights Reserved"
 
 [tool.poetry.dependencies]
 python = "^3.10.12"
