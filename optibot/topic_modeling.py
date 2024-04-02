@@ -65,7 +65,7 @@ def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_top
 
     for num_topics in range(start_topic_count, end_topic_count + 1, step):
         if verbose:
-            print("Fitting {num_topics} topics out of {end_topic_count} topics".format(start_topic_count=num_topics, end_topic_count=end_topic_count))
+            print("Fitting {num_topics} topics out of {end_topic_count} topics".format(num_topics=num_topics, end_topic_count=end_topic_count))
         with warnings.catch_warnings(record=True) as caught_warnings:
             warnings.simplefilter("always")
             lda_model = gensim.models.LdaModel(corpus=bow_corpus, id2word=dictionary, chunksize=cfg.CHUNKSIZE,
