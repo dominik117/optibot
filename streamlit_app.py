@@ -26,13 +26,15 @@ else:
     else:
         st.success("Thank you, key received.")
 
-
+@st.cache(allow_output_mutation=True)
 def st_run_optibot(df, api_key, context):
     print("Starting analysis function from streamlit...")
     topics = ob.main.run_optibot(df, api_key, context)
     st.session_state['topics'] = topics
     st.session_state['analysis_done'] = True
-    
+
+if st.button('Reset App'):
+    st.session_state.clear()
 
 st.title('OptiBot Optimization')
 data_file = st.file_uploader("Upload your data (CSV format)", type=["csv"])
