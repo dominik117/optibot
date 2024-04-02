@@ -2,7 +2,7 @@
 def generate_topic_labels(client, topics_keywords_as_list, context="chatbot conversations"):
     existing_labels = []
     topic_labels = {}
-
+    print("Generating topic labels...")
     for topic, keywords in topics_keywords_as_list.items():
         system_prompt = (
             "You are designed to generate concise labels for topics. "
@@ -37,6 +37,7 @@ def generate_topic_labels(client, topics_keywords_as_list, context="chatbot conv
         existing_labels.append(generated_label)
     
     # Label review and validation
+    print("Reviewing generated labels...")
     for topic, label in topic_labels.items():
         topic_details = "\n".join([f"{topic}: '{label}' generated with these keywords: {', '.join(topics_keywords_as_list[topic][:10])}" for topic, label in topic_labels.items()])
         review_prompt = (

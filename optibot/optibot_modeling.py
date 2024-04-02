@@ -49,7 +49,9 @@ class OptiBotModeling:
         start_time = time.time()  
         initial_memory_use = psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024)  
         
+        print("Normalizing conversations...")
         norm_conversations = topic_modeling.normalize_corpus(self.df_conversation)
+        print("Building bigrams and Bag of Words representation...")
         self._bow_corpus, dictionary, self._norm_conversations_bigrams = topic_modeling.gensim_build_bigrams_bow(norm_conversations)
 
         lda_models, self._coherence_df = topic_modeling.topic_modeling_by_coherence(
@@ -57,15 +59,17 @@ class OptiBotModeling:
             conversations=self._norm_conversations_bigrams,
             dictionary=dictionary,
             start_topic_count=self.start_topic_count,
-            end_topic_count=self.end_topic_count
+            end_topic_count=self.end_topic_count,
+            verbose=True,
         )
-
+        print("Selecting the best model...")
         best_model_idx = self._coherence_df['C_v Score'].idxmax()
         self._best_lda_model = lda_models[best_model_idx]
         self.best_number_topics = self._coherence_df['Number of Topics'].iloc[best_model_idx]
         self.best_coherence_score = self._coherence_df['C_v Score'].iloc[best_model_idx]
-
         lda_models = None # <-- Garbage collection
+
+        print("Fitting topics on the data...")
         self._fit_topics_on_data()
 
         end_memory_use = psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024) 
@@ -77,7 +81,6 @@ class OptiBotModeling:
         if self._best_lda_model is None:
             raise ValueError("Model not fitted. Call 'fit' before this method.")
 
-        print("Fitting topics on the data...")
         # Topic term extraction and dataframe creation
         topics = [[(term, round(wt, 3))
                     for term, wt in self._best_lda_model.show_topic(n, topn=20)]
@@ -92,7 +95,7 @@ class OptiBotModeling:
         self._topics_df_as_list = pd.DataFrame([[topic] for topic in [[term for term, wt in topic] for topic in topics]],
                                   columns=['Terms per Topic'],
                                   index=['Topic'+str(t) for t in range(1, self._best_lda_model.num_topics+1)])
-
+    
         tm_results = self._best_lda_model[self._bow_corpus]
         corpus_topics = [sorted(topics, key=lambda record: -record[1])[0]
                             for topics in tm_results]
@@ -104,22 +107,21 @@ class OptiBotModeling:
         self._corpus_topic_df['Conversation'] = self.df_conversation
 
         # Generate topic labels using the LLM
+        print("Generating topic labels using the LLM...")
         client = clients.create_openai_client(self.api_key)
-
-        print("Generating topic labels...")
         topics_keywords_as_list = self._topics_df_as_list.to_dict()["Terms per Topic"]
         topic_labels = llm_topic_labeling.generate_topic_labels(client, topics_keywords_as_list, self.context)
         def map_topic_label(topic_number):
             return topic_labels.get(f"Topic{topic_number}", "Unknown Topic")
-        
+        print("Mapping topic labels...")
         self._corpus_topic_df['Topic Label'] = self._corpus_topic_df['Dominant Topic'].apply(map_topic_label)
         self._corpus_topic_df.insert(1, 'Topic Label', self._corpus_topic_df.pop('Topic Label'))
         self._topics_df['Topic Label'] = self._topics_df.index.map(topic_labels)
         self._topics_df.insert(0, 'Topic Label', self._topics_df.pop('Topic Label'))
 
         # Assess the conversation responses with the LLM
-        print("Assessing conversation responses...")
-        self._assessed_conversations_df = llm_conversation_assessment.fit_response_assessment(client, self._corpus_topic_df.sample(200), self.context)
+        print("Assessing conversation responses using the LLM...")
+        self._assessed_conversations_df = llm_conversation_assessment.fit_response_assessment(client, self._corpus_topic_df.sample(500), self.context)
 
         # Generate final insights
         print("Generating final insights...")

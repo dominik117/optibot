@@ -24,8 +24,7 @@ def normalize_corpus(conversations):
     lemmatizer = nltk.stem.wordnet.WordNetLemmatizer()
     norm_conversations = []
 
-    print("Normalizing conversations: ")
-    for conversation in tqdm.tqdm(conversations):
+    for conversation in conversations:
         conversation = conversation.lower()
         conversation = re.sub(r'\{\{.*?\}\}', '', conversation)
         conversation_tokens = [token.strip() for token in tokenizer.tokenize(conversation)]
@@ -53,7 +52,7 @@ def gensim_build_bigrams_bow(norm_conversations):
 
     return bow_corpus, dictionary, norm_conversations_bigrams
 
-def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_topic_count=2, end_topic_count=10, step=1):
+def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_topic_count=2, end_topic_count=10, step=1, verbose=True):
     """
     Perform topic modeling and evaluate using coherence scores.
 
@@ -64,8 +63,9 @@ def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_top
     gensim_logger = logging.getLogger('gensim')
     gensim_logger.setLevel(logging.ERROR)
 
-    print("Fitting the n-topics iteration: ")
-    for num_topics in tqdm.tqdm(range(start_topic_count, end_topic_count + 1, step)):
+    for num_topics in range(start_topic_count, end_topic_count + 1, step):
+        if verbose:
+            print("Fitting {start_topic_count} topics out of {end_topic_count} topics".format(start_topic_count=num_topics, end_topic_count=end_topic_count))
         with warnings.catch_warnings(record=True) as caught_warnings:
             warnings.simplefilter("always")
             lda_model = gensim.models.LdaModel(corpus=bow_corpus, id2word=dictionary, chunksize=cfg.CHUNKSIZE,
