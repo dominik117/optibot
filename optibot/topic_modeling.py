@@ -2,10 +2,10 @@ import nltk
 import re
 import gensim
 import pandas as pd
-import logging
-import warnings
+# import logging
+# import warnings
 import numpy as np
-import tqdm
+import streamlit as st
 
 from . import config as cfg
 
@@ -52,6 +52,7 @@ def gensim_build_bigrams_bow(norm_conversations):
 
     return bow_corpus, dictionary, norm_conversations_bigrams
 
+@st.cache(allow_output_mutation=True)
 def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_topic_count=2, end_topic_count=10, step=1, verbose=True):
     """
     Perform topic modeling and evaluate using coherence scores.
@@ -60,34 +61,34 @@ def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_top
     lda_models = []
     scores = {"coherence_c_v_scores": [], "coherence_umass_scores": [], "perplexity_scores": [], "warnings": []}
 
-    gensim_logger = logging.getLogger('gensim')
-    gensim_logger.setLevel(logging.ERROR)
+    # gensim_logger = logging.getLogger('gensim')
+    # gensim_logger.setLevel(logging.ERROR)
 
     for num_topics in range(start_topic_count, end_topic_count + 1, step):
         if verbose:
             print("Fitting {num_topics} topics out of {end_topic_count} topics".format(num_topics=num_topics, end_topic_count=end_topic_count))
-        with warnings.catch_warnings(record=True) as caught_warnings:
-            warnings.simplefilter("always")
-            lda_model = gensim.models.LdaModel(corpus=bow_corpus, id2word=dictionary, chunksize=cfg.CHUNKSIZE,
-                                               alpha='auto', eta='auto', random_state=7, iterations=cfg.ITERATIONS,
-                                               num_topics=num_topics, passes=cfg.PASSES, eval_every=None)
-            lda_models.append(lda_model)
+        # with warnings.catch_warnings(record=True) as caught_warnings:
+        #     warnings.simplefilter("always")
+        lda_model = gensim.models.LdaModel(corpus=bow_corpus, id2word=dictionary, chunksize=cfg.CHUNKSIZE,
+                                        alpha='auto', eta='auto', random_state=7, iterations=cfg.ITERATIONS,
+                                        num_topics=num_topics, passes=cfg.PASSES, eval_every=None)
+        lda_models.append(lda_model)
 
-            # Coherence and perplexity evaluations
-            cv_coherence = gensim.models.CoherenceModel(model=lda_model, corpus=bow_corpus, texts=conversations,
-                                                        dictionary=dictionary, coherence='c_v').get_coherence()
-            scores["coherence_c_v_scores"].append(cv_coherence)
+        # Coherence and perplexity evaluations
+        cv_coherence = gensim.models.CoherenceModel(model=lda_model, corpus=bow_corpus, texts=conversations,
+                                                    dictionary=dictionary, coherence='c_v').get_coherence()
+        scores["coherence_c_v_scores"].append(cv_coherence)
 
-            umass_coherence = gensim.models.CoherenceModel(model=lda_model, corpus=bow_corpus, texts=conversations,
-                                                           dictionary=dictionary, coherence='u_mass').get_coherence()
-            scores["coherence_umass_scores"].append(umass_coherence)
+        umass_coherence = gensim.models.CoherenceModel(model=lda_model, corpus=bow_corpus, texts=conversations,
+                                                    dictionary=dictionary, coherence='u_mass').get_coherence()
+        scores["coherence_umass_scores"].append(umass_coherence)
 
-            perplexity = lda_model.log_perplexity(bow_corpus)
-            scores["perplexity_scores"].append(perplexity)
+        perplexity = lda_model.log_perplexity(bow_corpus)
+        scores["perplexity_scores"].append(perplexity)
 
-            # Capture warnings
-            warning_message = [str(warning.message) for warning in caught_warnings if "updated prior is not positive" in str(warning.message)]
-            scores["warnings"].append(warning_message[0] if warning_message else None)
+        # # Capture warnings
+        # warning_message = [str(warning.message) for warning in caught_warnings if "updated prior is not positive" in str(warning.message)]
+        # scores["warnings"].append(warning_message[0] if warning_message else None)
 
     # Dataframe for coherence scores
     coherence_df = pd.DataFrame({
@@ -95,7 +96,7 @@ def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_top
         'C_v Score': np.round(scores["coherence_c_v_scores"], 4),
         'UMass Score': np.round(scores["coherence_umass_scores"], 4),
         'Perplexity Score': np.round(scores["perplexity_scores"], 4),
-        'Warnings': scores["warnings"]
+        # 'Warnings': scores["warnings"]
     })
 
     return lda_models, coherence_df
