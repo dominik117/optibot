@@ -28,6 +28,7 @@ else:
 
 
 def st_run_optibot(df, api_key, context):
+    print("Starting analysis function from streamlit...")
     topics = ob.main.run_optibot(df, api_key, context)
     st.session_state['topics'] = topics
     st.session_state['analysis_done'] = True
