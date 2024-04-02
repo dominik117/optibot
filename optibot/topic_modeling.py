@@ -18,11 +18,6 @@ def normalize_corpus(conversations):
     Normalize the corpus by converting to lowercase, removing special entities,
     tokenizing, lemmatizing, and removing stopwords.
 
-    Parameters:
-    conversations (list): List of conversations to be normalized.
-
-    Returns:
-    list: List of normalized conversations.
     """
     stop_words = nltk.corpus.stopwords.words('english')
     tokenizer = nltk.tokenize.RegexpTokenizer(r'\w+')
@@ -48,11 +43,6 @@ def gensim_build_bigrams_bow(norm_conversations):
     """
     Build bigrams and Bag of Words representation of the normalized conversations.
 
-    Parameters:
-    norm_conversations (list): List of normalized conversations.
-
-    Returns:
-    tuple: Tuple containing the Bag of Words corpus, dictionary, and conversations with bigrams.
     """
     bigram = gensim.models.Phrases(norm_conversations, min_count=cfg.MIN_COUNT, threshold=cfg.THRESHOLD, delimiter='_')
     bigram_model = gensim.models.phrases.Phraser(bigram)
@@ -67,16 +57,6 @@ def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_top
     """
     Perform topic modeling and evaluate using coherence scores.
 
-    Parameters:
-    bow_corpus (list): Bag of Words corpus.
-    conversations (list): Conversations with bigrams.
-    dictionary (gensim.corpora.Dictionary): Gensim dictionary.
-    start_topic_count (int): Starting number of topics.
-    end_topic_count (int): Ending number of topics.
-    step (int): Step size for the number of topics.
-
-    Returns:
-    tuple: Tuple containing the LDA models, coherence dataframe, and coherence plot.
     """
     lda_models = []
     scores = {"coherence_c_v_scores": [], "coherence_umass_scores": [], "perplexity_scores": [], "warnings": []}
