@@ -8,7 +8,24 @@ import os
 from zoneinfo import ZoneInfo
 
 load_dotenv()
-st.session_state['api_key'] = os.getenv('OPENAI_API_KEY')
+api_key = os.getenv('OPENAI_API_KEY')
+
+if api_key:
+    st.session_state['api_key'] = api_key
+    st.session_state['api_key_received'] = True
+else:
+    if 'api_key_received' not in st.session_state or not st.session_state['api_key_received']:
+        user_input = st.text_input("Enter your OpenAI API key:")
+        if st.button('Submit API Key'):
+            if user_input:
+                st.session_state['api_key'] = user_input
+                st.session_state['api_key_received'] = True
+                st.rerun()
+            else:
+                st.warning('Please enter a valid API key.')
+    else:
+        st.success("Thank you, key received.")
+
 
 def st_run_optibot(df, api_key, context):
     topics = ob.main.run_optibot(df, api_key, context)
