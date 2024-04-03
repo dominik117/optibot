@@ -121,7 +121,7 @@ class OptiBotModeling:
 
         # Assess the conversation responses with the LLM
         print("Assessing conversation responses using the LLM...")
-        self._assessed_conversations_df = llm_conversation_assessment.fit_response_assessment(client, self._corpus_topic_df.sample(200), self.context)
+        self._assessed_conversations_df = llm_conversation_assessment.fit_response_assessment(client, self._corpus_topic_df.sample(100), self.context)
 
         # Generate final insights
         print("Generating final insights...")
