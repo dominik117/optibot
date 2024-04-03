@@ -26,7 +26,7 @@ else:
     else:
         st.success("Thank you, key received.")
 
-@st.cache(allow_output_mutation=True)
+@st.cache_data #(allow_output_mutation=True)
 def st_run_optibot(df, api_key, context):
     if 'analysis_started' not in st.session_state:
         st.session_state.analysis_started = True
@@ -35,6 +35,13 @@ def st_run_optibot(df, api_key, context):
         st.session_state['topics'] = topics
         st.session_state['analysis_done'] = True
         st.session_state.analysis_started = False
+
+if 'topics' not in st.session_state:
+    st.session_state['topics'] = None
+
+if 'analysis_done' not in st.session_state:
+    st.session_state['analysis_done'] = False
+
 
 if st.button('Reset App'):
     st.session_state.clear()
@@ -90,9 +97,9 @@ if data_file is not None:
             st.write("Analysis started at: ", formatted_time)
             st.write("The estimated time for this analysis is usually around 2 hours. Please be patient.")
 
-            if 'analysis_done' not in st.session_state or not st.session_state.analysis_done:
-                if data_file and 'result_df' in st.session_state and st.session_state['context'] and not st.session_state.get('analysis_started', False):
-                    st_run_optibot(st.session_state['result_df'], st.session_state['api_key'], st.session_state['context'])
+            if not st.session_state.get('analysis_done', False): #'analysis_done' not in st.session_state or 
+                #if data_file and 'result_df' in st.session_state and st.session_state['context'] and not st.session_state.get('analysis_started', False):
+                st_run_optibot(st.session_state['result_df'], st.session_state['api_key'], st.session_state['context'])
 
             # st_run_optibot(st.session_state['result_df'], st.session_state['api_key'], st.session_state['context'])
 
