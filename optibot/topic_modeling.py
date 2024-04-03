@@ -52,7 +52,7 @@ def gensim_build_bigrams_bow(norm_conversations):
 
     return bow_corpus, dictionary, norm_conversations_bigrams
 
-@st.cache(allow_output_mutation=True)
+# @st.cache(allow_output_mutation=True)
 def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_topic_count=2, end_topic_count=10, step=1, verbose=True):
     """
     Perform topic modeling and evaluate using coherence scores.
@@ -79,13 +79,12 @@ def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_top
                                                     dictionary=dictionary, coherence='c_v').get_coherence()
         scores["coherence_c_v_scores"].append(cv_coherence)
 
-        umass_coherence = gensim.models.CoherenceModel(model=lda_model, corpus=bow_corpus, texts=conversations,
-                                                    dictionary=dictionary, coherence='u_mass').get_coherence()
-        scores["coherence_umass_scores"].append(umass_coherence)
+        # umass_coherence = gensim.models.CoherenceModel(model=lda_model, corpus=bow_corpus, texts=conversations,
+        #                                             dictionary=dictionary, coherence='u_mass').get_coherence()
+        # scores["coherence_umass_scores"].append(umass_coherence)
 
-        perplexity = lda_model.log_perplexity(bow_corpus)
-        scores["perplexity_scores"].append(perplexity)
-
+        # perplexity = lda_model.log_perplexity(bow_corpus)
+        # scores["perplexity_scores"].append(perplexity)
         # # Capture warnings
         # warning_message = [str(warning.message) for warning in caught_warnings if "updated prior is not positive" in str(warning.message)]
         # scores["warnings"].append(warning_message[0] if warning_message else None)
@@ -94,8 +93,8 @@ def topic_modeling_by_coherence(bow_corpus, conversations, dictionary, start_top
     coherence_df = pd.DataFrame({
         'Number of Topics': range(start_topic_count, end_topic_count + 1, step),
         'C_v Score': np.round(scores["coherence_c_v_scores"], 4),
-        'UMass Score': np.round(scores["coherence_umass_scores"], 4),
-        'Perplexity Score': np.round(scores["perplexity_scores"], 4),
+        # 'UMass Score': np.round(scores["coherence_umass_scores"], 4),
+        # 'Perplexity Score': np.round(scores["perplexity_scores"], 4),
         # 'Warnings': scores["warnings"]
     })
 
