@@ -47,6 +47,12 @@ if st.button('Reset App'):
     st.session_state.clear()
 
 st.title('OptiBot Optimization')
+
+st.write("This app is designed to optimize the performance of your chatbot by analyzing the conversations and providing insights on how to improve the chatbot's performance.")
+st.write("\n")
+st.markdown("Optibot also avaliable on [Github](https://github.com/dominik117/optibot/), install on your system for potentially better performance.")
+st.write("\n")
+st.write("Please upload your chatbot conversations in CSV format, a sample of 20,000 to 40,000 conversations is recommended for optimal performance.")
 data_file = st.file_uploader("Upload your data (CSV format)", type=["csv"])
 
 if data_file is not None:
