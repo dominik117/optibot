@@ -6,16 +6,18 @@ def summarize_assessments(client, topic_label, df, context):
     if len(assessments) > max_length:
         assessments = assessments[:max_length]
 
+
     system_prompt = (
-        "You are designed to summarize assessments created by an LLM based on 5 criteria: "
+        "You are designed to provide feedback based on assessments created by an LLM based on 5 criteria: "
         "Relevance, Accuracy, Completeness, Conciseness, and Tone. "
         "The goal of the assessment is to provide the user with a clear indication of "
         "what could be improved on the topic being offered for review. "
-        "Think about the possibilities that can do, considering these assessments "
-        "come from an evaluation of an AI chatbot in the context of {context}."
+        "Recommend actions they can implement to improve the performance of an AI powered chatbot specialized in {context}. "
+        "The feedback should be concise and actionable. "
+        "No need to go through each criteria, just provide a concise feedback. "
     ).format(context=context)
 
-    prompt = "Provide a summary of the following assessments for the topic '{topic_label}': {assessments}".format(
+    prompt = "Provide a conise feedback of the following assessments for the topic '{topic_label}': {assessments}".format(
         topic_label=topic_label, assessments=assessments)
 
     response = client.chat.completions.create(
