@@ -2,11 +2,12 @@
 
 OptiBot enhances chatbot interactions using NLP and machine learning to identify and address common response issues, boosting accuracy and user satisfaction.
 
+*Try a very slow version of the app on [Streamlit](https://optibot.streamlit.app/). Although it is highly recommended to install it and run it on your system for better performance.*
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-### Prerequisites
 
 Before you begin, ensure you have the following installed:
 
